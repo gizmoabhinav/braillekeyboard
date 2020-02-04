@@ -1,0 +1,4 @@
+#Tue Feb 04 16:55:05 IST 2020
+base.0=C\:\\Users\\abmukh\\Downloads\\simple-keyboard-master\\SampleIME\\app\\build\\intermediates\\dex\\debug\\mergeDexDebug\\out
+path.0=classes.dex
+renamed.0=classes.dex
