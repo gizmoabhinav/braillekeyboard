@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Build;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RawRes;
@@ -49,6 +50,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 
 public class ImageKeyboard extends InputMethodService {
@@ -67,131 +69,13 @@ public class ImageKeyboard extends InputMethodService {
     private Button mWebpButton;
 
     private Button[] keys = new Button[8];
+    HashMap<Integer, String> charMap = new HashMap<>();
     private RelativeLayout layout;
+    private int currentChar;
+    private int lastChar;
+    private CountDownTimer timer;
+    private InputConnection inputConnection;
     private int numberOfKeys = 0;
-
-    private boolean isCommitContentSupported(
-            @Nullable EditorInfo editorInfo, @NonNull String mimeType) {
-        if (editorInfo == null) {
-            return false;
-        }
-
-        final InputConnection ic = getCurrentInputConnection();
-        if (ic == null) {
-            return false;
-        }
-
-        if (!validatePackageName(editorInfo)) {
-            return false;
-        }
-
-        final String[] supportedMimeTypes = EditorInfoCompat.getContentMimeTypes(editorInfo);
-        for (String supportedMimeType : supportedMimeTypes) {
-            if (ClipDescription.compareMimeTypes(mimeType, supportedMimeType)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void doCommitContent(@NonNull String description, @NonNull String mimeType,
-            @NonNull File file) {
-        final EditorInfo editorInfo = getCurrentInputEditorInfo();
-
-        // Validate packageName again just in case.
-        if (!validatePackageName(editorInfo)) {
-            return;
-        }
-
-        final Uri contentUri = FileProvider.getUriForFile(this, AUTHORITY, file);
-
-        // As you as an IME author are most likely to have to implement your own content provider
-        // to support CommitContent API, it is important to have a clear spec about what
-        // applications are going to be allowed to access the content that your are going to share.
-        final int flag;
-        if (Build.VERSION.SDK_INT >= 25) {
-            // On API 25 and later devices, as an analogy of Intent.FLAG_GRANT_READ_URI_PERMISSION,
-            // you can specify InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION to give
-            // a temporary read access to the recipient application without exporting your content
-            // provider.
-            flag = InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION;
-        } else {
-            // On API 24 and prior devices, we cannot rely on
-            // InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION. You as an IME author
-            // need to decide what access control is needed (or not needed) for content URIs that
-            // you are going to expose. This sample uses Context.grantUriPermission(), but you can
-            // implement your own mechanism that satisfies your own requirements.
-            flag = 0;
-            try {
-                // TODO: Use revokeUriPermission to revoke as needed.
-                grantUriPermission(
-                        editorInfo.packageName, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            } catch (Exception e){
-                Log.e(TAG, "grantUriPermission failed packageName=" + editorInfo.packageName
-                        + " contentUri=" + contentUri, e);
-            }
-        }
-
-        final InputContentInfoCompat inputContentInfoCompat = new InputContentInfoCompat(
-                contentUri,
-                new ClipDescription(description, new String[]{mimeType}),
-                null /* linkUrl */);
-        InputConnectionCompat.commitContent(
-                getCurrentInputConnection(), getCurrentInputEditorInfo(), inputContentInfoCompat,
-                flag, null);
-    }
-
-    private boolean validatePackageName(@Nullable EditorInfo editorInfo) {
-        if (editorInfo == null) {
-            return false;
-        }
-        final String packageName = editorInfo.packageName;
-        if (packageName == null) {
-            return false;
-        }
-
-        // In Android L MR-1 and prior devices, EditorInfo.packageName is not a reliable identifier
-        // of the target application because:
-        //   1. the system does not verify it [1]
-        //   2. InputMethodManager.startInputInner() had filled EditorInfo.packageName with
-        //      view.getContext().getPackageName() [2]
-        // [1]: https://android.googlesource.com/platform/frameworks/base/+/a0f3ad1b5aabe04d9eb1df8bad34124b826ab641
-        // [2]: https://android.googlesource.com/platform/frameworks/base/+/02df328f0cd12f2af87ca96ecf5819c8a3470dc8
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return true;
-        }
-
-        final InputBinding inputBinding = getCurrentInputBinding();
-        if (inputBinding == null) {
-            // Due to b.android.com/225029, it is possible that getCurrentInputBinding() returns
-            // null even after onStartInputView() is called.
-            // TODO: Come up with a way to work around this bug....
-            Log.e(TAG, "inputBinding should not be null here. "
-                    + "You are likely to be hitting b.android.com/225029");
-            return false;
-        }
-        final int packageUid = inputBinding.getUid();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            final AppOpsManager appOpsManager =
-                    (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
-            try {
-                appOpsManager.checkPackage(packageUid, packageName);
-            } catch (Exception e) {
-                return false;
-            }
-            return true;
-        }
-
-        final PackageManager packageManager = getPackageManager();
-        final String possiblePackageNames[] = packageManager.getPackagesForUid(packageUid);
-        for (final String possiblePackageName : possiblePackageNames) {
-            if (packageName.equals(possiblePackageName)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     @Override
     public void onCreate() {
@@ -200,9 +84,32 @@ public class ImageKeyboard extends InputMethodService {
         // TODO: Avoid file I/O in the main thread.
         final File imagesDir = new File(getFilesDir(), "images");
         imagesDir.mkdirs();
-        mGifFile = getFileForResource(this, R.raw.animated_gif, imagesDir, "image.gif");
-        mPngFile = getFileForResource(this, R.raw.dessert_android, imagesDir, "image.png");
-        mWebpFile = getFileForResource(this, R.raw.animated_webp, imagesDir, "image.webp");
+        charMap.put(16,"a");
+        charMap.put(48,"b");
+        charMap.put(24,"c");
+        charMap.put(28,"d");
+        charMap.put(20,"e");
+        charMap.put(56,"f");
+        charMap.put(60,"g");
+        charMap.put(52,"h");
+        charMap.put(40,"i");
+        charMap.put(44,"j");
+        charMap.put(80,"k");
+        charMap.put(112,"l");
+        charMap.put(88,"m");
+        charMap.put(92,"n");
+        charMap.put(84,"o");
+        charMap.put(120,"p");
+        charMap.put(124,"q");
+        charMap.put(116,"r");
+        charMap.put(104,"s");
+        charMap.put(108,"t");
+        charMap.put(82,"u");
+        charMap.put(114,"v");
+        charMap.put(46,"w");
+        charMap.put(90,"x");
+        charMap.put(94,"y");
+        charMap.put(86,"z");
     }
 
     @Override
@@ -222,6 +129,7 @@ public class ImageKeyboard extends InputMethodService {
     @Override
     public void onStartInputView(EditorInfo info, boolean restarting) {
 
+        inputConnection = getCurrentInputConnection();
         //layout.removeAllViews();
         for (Button btn : keys) {
             layout.removeView(btn);
@@ -237,7 +145,22 @@ public class ImageKeyboard extends InputMethodService {
                 float x = event.getX();
                 float y = event.getY();
 
-                keys[numberOfKeys] = new Button(getApplicationContext());
+                final Button btn = new Button(getApplicationContext());
+                btn.setText(String.valueOf(numberOfKeys+1));
+                btn.setTag(String.valueOf(numberOfKeys+1));
+                btn.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        if (event.getAction() == MotionEvent.ACTION_DOWN ) {
+                            updateCurrent(1<<(8-Integer.parseInt(btn.getTag().toString())));
+                        } else if (event.getAction() == MotionEvent.ACTION_UP ) {
+                            updateCurrent(0-(1<<(8-Integer.parseInt(btn.getTag().toString()))));
+                        }
+                        return false;
+                    }
+                });
+                keys[numberOfKeys] = btn;
+
                 //btn.setText((x-v.getLeft())+" "+(y-v.getTop()));
                 RelativeLayout.LayoutParams bp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                 bp.leftMargin = (int) x-v.getLeft()-10;
@@ -251,6 +174,31 @@ public class ImageKeyboard extends InputMethodService {
         //mGifButton.setEnabled(mGifFile != null && isCommitContentSupported(info, MIME_TYPE_GIF));
         //mPngButton.setEnabled(mPngFile != null && isCommitContentSupported(info, MIME_TYPE_PNG));
         //mWebpButton.setEnabled(mWebpFile != null && isCommitContentSupported(info, MIME_TYPE_WEBP));
+    }
+
+    private void updateCurrent(int delta) {
+        if (timer != null) {
+            timer.cancel();
+        }
+        //inputConnection.commitText(String.valueOf(delta),String.valueOf(delta).length());
+        currentChar += delta;
+        if (delta < 0) {
+            return;
+        }
+        timer = new CountDownTimer(150, 200) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                // do nothing
+            }
+
+            @Override
+            public void onFinish() {
+                if (charMap.containsKey(currentChar)) {
+                    inputConnection.commitText(charMap.get(currentChar),1);
+                }
+            }
+        };
+        timer.start();
     }
 
     private static File getFileForResource(
