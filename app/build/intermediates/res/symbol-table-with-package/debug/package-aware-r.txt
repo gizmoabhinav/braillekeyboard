@@ -1,4 +1,4 @@
-com.example.android.commitcontent.ime
+com.example.android.braillekeyboard
 anim abc_fade_in
 anim abc_fade_out
 anim abc_grow_fade_in_from_bottom
@@ -784,9 +784,6 @@ layout select_dialog_singlechoice_material
 layout support_simple_spinner_dropdown_item
 mipmap ic_launcher
 mipmap ic_launcher_round
-raw animated_gif
-raw animated_webp
-raw dessert_android
 string abc_action_bar_home_description
 string abc_action_bar_up_description
 string abc_action_menu_overflow_description

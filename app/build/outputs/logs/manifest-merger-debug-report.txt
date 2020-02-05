@@ -37,7 +37,7 @@ INJECTED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src
 INJECTED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:1:1-33:12
 INJECTED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:1:1-33:12
 	package
-		ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:2:5-52
+		ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:2:5-50
 		INJECTED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml
 		INJECTED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml
 	android:versionName
@@ -70,12 +70,12 @@ MERGED from [com.android.support:versionedparcelable:28.0.0] C:\Users\abmukh\.gr
 		ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:5:9-36
 	android:theme
 		ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:10:9-40
-service#com.example.android.commitcontent.ime.ImageKeyboard
+service#com.example.android.braillekeyboard.ImageKeyboard
 ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:12:9-19:19
 	android:permission
 		ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:14:13-70
 	android:name
-		ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:13:13-79
+		ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:13:13-77
 intent-filter#action:name:android.view.InputMethod
 ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:15:13-17:29
 action#android.view.InputMethod
@@ -93,7 +93,7 @@ ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\ma
 	android:grantUriPermissions
 		ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:25:13-47
 	android:authorities
-		ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:23:13-85
+		ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:23:13-83
 	android:exported
 		ADDED from C:\Users\abmukh\Downloads\simple-keyboard-master\SampleIME\app\src\main\AndroidManifest.xml:24:13-37
 	android:name
