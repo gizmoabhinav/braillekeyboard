@@ -1,5 +1,6 @@
 package com.example.android.braillekeyboard;
 
+import android.content.Context;
 import android.inputmethodservice.InputMethodService;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
@@ -14,7 +15,7 @@ import java.util.HashMap;
 
 public class ImageKeyboard extends InputMethodService {
 
-    private CircleButton[] keys = new CircleButton[8];
+    private View[] keys = new View[8];
     HashMap<Integer, String> charMap = new HashMap<>();
     private RelativeLayout layout;
     private int currentChar;
@@ -76,7 +77,7 @@ public class ImageKeyboard extends InputMethodService {
 
         inputConnection = getCurrentInputConnection();
         //layout.removeAllViews();
-        for (CircleButton btn : keys) {
+        for (View btn : keys) {
             layout.removeView(btn);
         }
         numberOfKeys = 0;
@@ -90,7 +91,9 @@ public class ImageKeyboard extends InputMethodService {
                 float x = event.getX();
                 float y = event.getY();
 
-                final CircleButton btn = new CircleButton(getApplicationContext());
+                LayoutInflater vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                final View btn = vi.inflate(R.layout.button_view, layout);
+
                 //btn.setText(String.valueOf(numberOfKeys+1));
                 btn.setTag(String.valueOf(numberOfKeys+1));
                 btn.setOnTouchListener(new View.OnTouchListener() {
