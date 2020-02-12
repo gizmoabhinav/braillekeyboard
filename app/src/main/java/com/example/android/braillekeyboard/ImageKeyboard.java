@@ -7,7 +7,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
-import android.widget.Button;
 import android.widget.RelativeLayout;
 import java.io.File;
 import java.util.HashMap;
@@ -15,7 +14,7 @@ import java.util.HashMap;
 
 public class ImageKeyboard extends InputMethodService {
 
-    private Button[] keys = new Button[8];
+    private CircleButton[] keys = new CircleButton[8];
     HashMap<Integer, String> charMap = new HashMap<>();
     private RelativeLayout layout;
     private int currentChar;
@@ -77,7 +76,7 @@ public class ImageKeyboard extends InputMethodService {
 
         inputConnection = getCurrentInputConnection();
         //layout.removeAllViews();
-        for (Button btn : keys) {
+        for (CircleButton btn : keys) {
             layout.removeView(btn);
         }
         numberOfKeys = 0;
@@ -91,8 +90,8 @@ public class ImageKeyboard extends InputMethodService {
                 float x = event.getX();
                 float y = event.getY();
 
-                final Button btn = new Button(getApplicationContext());
-                btn.setText(String.valueOf(numberOfKeys+1));
+                final CircleButton btn = new CircleButton(getApplicationContext());
+                //btn.setText(String.valueOf(numberOfKeys+1));
                 btn.setTag(String.valueOf(numberOfKeys+1));
                 btn.setOnTouchListener(new View.OnTouchListener() {
                     @Override
