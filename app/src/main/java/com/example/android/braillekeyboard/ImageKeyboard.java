@@ -33,6 +33,7 @@ public class ImageKeyboard extends InputMethodService {
         // TODO: Avoid file I/O in the main thread.
         final File imagesDir = new File(getFilesDir(), "images");
         imagesDir.mkdirs();
+        charMap.put(128, " ");
         charMap.put(16, "a");
         charMap.put(48, "b");
         charMap.put(24, "c");
@@ -149,6 +150,9 @@ public class ImageKeyboard extends InputMethodService {
             public void onFinish() {
                 if (charMap.containsKey(currentChar)) {
                     inputConnection.commitText(charMap.get(currentChar), 1);
+                }
+                if(currentChar == 1) {
+                    inputConnection.deleteSurroundingText(1, 0);
                 }
             }
         };
