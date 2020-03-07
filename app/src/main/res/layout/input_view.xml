@@ -4,11 +4,11 @@
     android:orientation="vertical"
     android:background="@android:color/black"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content">
 
     <View
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="400dp"/>
+        android:layout_marginTop="600dp"/>
 </RelativeLayout>

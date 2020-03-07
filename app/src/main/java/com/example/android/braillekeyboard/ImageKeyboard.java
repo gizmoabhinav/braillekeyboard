@@ -9,6 +9,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -66,6 +67,10 @@ public class ImageKeyboard extends InputMethodService {
     public View onCreateInputView() {
         LayoutInflater li = LayoutInflater.from(this);
         layout = (RelativeLayout) li.inflate(R.layout.input_view, null);
+        int height= getApplicationContext().getResources().getDisplayMetrics().heightPixels;
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, height, 0, 0);
+        layout.setLayoutParams(lp);
         return layout;
     }
 
